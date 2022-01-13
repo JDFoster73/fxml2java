@@ -14,7 +14,7 @@ The basic workflow is:
 -Run the converter (see example code for explanation of how to do this).  This will initially generate the java files in the source locations specified by the full filename
  of the fxml file.  For example, if an fxml file in source package org/form/basis (the location of the source package doesn't really matter, just that it is in the
  same project as the destination file) named org.pack1.pack2.Result.fxml is run through the converter, then the resulting Java file will be saved in the destination 
- package org/pack1/pack2/Result.java
+ package org/pack1/pack2/Result.java of the same project.
  
 -Instantiate the class and access the main form container using the getMainContainer() method.  Again, see example code for more information.
 
