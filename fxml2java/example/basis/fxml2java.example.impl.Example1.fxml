@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="536.0" prefWidth="829.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <HBox alignment="CENTER" prefWidth="200.0" VBox.vgrow="NEVER">
+         <children>
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%title">
+               <font>
+                  <Font name="Segoe UI Bold Italic" size="19.0" />
+               </font>
+            </Text>
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+         <VBox.margin>
+            <Insets />
+         </VBox.margin>
+      </HBox>
+      <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+         <children>
+            <VBox alignment="CENTER" prefHeight="480.0" prefWidth="194.0" spacing="5.0">
+               <HBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </HBox.margin>
+               <children>
+                  <Button fx:id="btnLeftPanel1" mnemonicParsing="false" onAction="#onBtnLeft1" prefWidth="10000.0" text="%button1.txt" />
+                  <Button fx:id="btnLeftPanel2" mnemonicParsing="false" onAction="#onBtnLeft2" prefWidth="10000.0" text="%button2.txt" />
+                  <Button fx:id="btnLeftPanel3" mnemonicParsing="false" onAction="#onBtnLeft3" prefWidth="10000.0" text="%button3.txt" />
+                  <VBox prefWidth="100.0" spacing="10.0" styleClass="ex-class-1" stylesheets="@../style1.css" VBox.vgrow="NEVER">
+                     <children>
+                        <RadioButton mnemonicParsing="false" selected="true" text="%radio1.txt">
+                           <toggleGroup>
+                              <ToggleGroup fx:id="tg1" />
+                           </toggleGroup></RadioButton>
+                        <RadioButton mnemonicParsing="false" text="%radio2.txt" toggleGroup="$tg1" />
+                        <RadioButton mnemonicParsing="false" text="%radio3.txt" toggleGroup="$tg1" />
+                     </children>
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                  </VBox>
+               </children>
+            </VBox>
+            <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Button fx:id="btnRHSAddTItem" mnemonicParsing="false" onAction="#onRHSAddTItem" text="%button.add">
+                     <graphic>
+                        <ImageView fitHeight="150.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../New.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <TableView id="&lt;fxml2java.example.TableItem" fx:id="tblItemTable" prefHeight="264.0" prefWidth="609.0">
+                    <columns>
+                      <TableColumn id="&lt;fxml2java.example.TableItem,String" fx:id="tclCol1" prefWidth="233.0" resizable="false" text="%table.column1.title" />
+                      <TableColumn id="&lt;fxml2java.example.TableItem,String" fx:id="tclCol2" prefWidth="282.0" resizable="false" text="%table.column2.title" />
+                    </columns>
+                  </TableView>
+                  <GridPane>
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="300.0" minWidth="10.0" prefWidth="155.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="488.0" minWidth="10.0" prefWidth="454.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label text="%gpane.row1.label" />
+                        <Label text="%gpane.row2.label" GridPane.rowIndex="1" />
+                        <Label text="%gpane.row3.label" GridPane.rowIndex="2" />
+                        <TextField fx:id="txtRHBTxt1" editable="false" GridPane.columnIndex="1" />
+                        <TextField fx:id="txtRHBTxt2" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <TextField fx:id="txtRHBTxt3" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                     </children>
+                  </GridPane>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <Button fx:id="btnShowDlg" mnemonicParsing="false" onAction="#actShowDialogue" text="%button.dlg.lbl" />
+                     </children>
+                  </HBox>
+               </children>
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+               <padding>
+                  <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+               </padding>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+   <padding>
+      <Insets right="10.0" />
+   </padding>
+</VBox>

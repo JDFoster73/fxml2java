@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <padding>
+      <Insets right="10.0" />
+   </padding>
+   <children>
+      <VBox fillWidth="false" maxWidth="1000.0" spacing="10.0" VBox.vgrow="NEVER">
+         <children>
+            <ChoiceBox id="&lt;String" fx:id="chbChoices" prefHeight="25.0" prefWidth="169.0" />
+            <CheckBox fx:id="chkCheck" mnemonicParsing="false" text="%dlg1.chk.lbl" VBox.vgrow="NEVER" />
+         </children>
+      </VBox>
+   </children>
+</VBox>

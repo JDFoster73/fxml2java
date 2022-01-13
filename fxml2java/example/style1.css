@@ -1,0 +1,7 @@
+.ex-class-1{
+	-fx-border-color : red;
+	-fx-border-radius : 5;
+	-fx-border-width : 3;
+	-fx-border-style : dashed;
+	-fx-background-color : honeydew;
+}
