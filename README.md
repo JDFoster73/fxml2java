@@ -18,9 +18,8 @@ The basic workflow is:
  
 -Instantiate the class and access the main form container using the getMainContainer() method.  Again, see example code for more information.
 
--Update fxml file(s) in SceneBuilder or using the text editor to edit the XML source.  Run the converter and it will update the destination Java files but replicate any 
- non-generated methods, fields and imports. Note that the converter messes up the formatting but all IDEs contain a handy code formatter so I don't find this to be a problem.
+-Update fxml file(s) in SceneBuilder or using the text editor to edit the XML source.  Run the converter and it will rebuild the destination Java files from the updated FXML but retain any non-generated methods, fields and imports from each old destination file. Note that the converter messes up the formatting but all IDEs contain a handy code formatter so I don't find this to be a problem.
  
--If you change the name of an FXML file for which a Java file has already been generated, you *MUST* change the name of the generated Java file for this FXML source file or the  converter will create a brand new file that does not contain any additions that have been made to the destination Java file subsequently.
+-If you change the name of an FXML file for which a Java file has already been generated, you *MUST* change the name of the generated Java file for this FXML source file or the  converter will create a brand new destination file with the new filename that does not contain any additions that have been made to the destination Java file subsequently.
  
  
