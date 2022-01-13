@@ -1,7 +1,7 @@
 # fxml2java
 Takes FXML files created in SceneBuilder (for example) and builds (and then rebuilds) a POJO class to achieve the same but which is easier to work with than FXML (in my opinion)
 
-Requires linking to the java fx modules in order to run the example but not just to run the converter.  The converter depends on the JavaParser library to rebuild changed files so the user must acquire this seperately.  It is on GitHub.
+Requires linking to the java fx modules in order to run the example but not just to run the converter.  The converter depends on the JavaParser library to rebuild changed files so the user must acquire this seperately.  It is on GitHub (https://github.com/javaparser/javaparser).
 
 The library is not complete.  If conversion fails because the library doesn't know how to handle a given element or attribute then send me a message and I'll add it in.  Alternatively, feel free to get involved.
 
