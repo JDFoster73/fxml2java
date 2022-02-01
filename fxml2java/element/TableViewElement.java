@@ -1,15 +1,20 @@
 /**
- * Copyright 2021 James David Foster jdfoster73@gmail.com
- * 
- * This file is part of fxml2java.
- * 
- * fxml2java is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
- * 
- * fxml2java is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty 
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License along with fxml2java. If not, see <https://www.gnu.org/licenses/>. 
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.    
  */
 package fxml2java.element;
 
@@ -44,11 +49,6 @@ public class TableViewElement extends RegionElement
 
   private void handleColumms(Element element)
   {
-    //Create a string builder for the add children postfix instruction.
-//    StringBuilder sb = new StringBuilder();
-//    sb.append(instanceName + ".getColumns().addAll(");
-//    boolean sep = false;
-    
     //Get the <TableColumn>s
     NodeList elementsByTagName = element.getElementsByTagName("TableColumn");
     //This should return a node list with column elements in it.
@@ -63,23 +63,8 @@ public class TableViewElement extends RegionElement
       //Add the table column to the table view's sub-node list.
       addSubNode(createSubNode);
 
-      //Separator.
-  //    if(sep) sb.append(", ");
-      //Add to child instances.
-  //    sb.append(createSubNode.instanceName);
-      //Set sep.
-  //    sep = true;
-
       //Create a postfix instruction to add the children to the regions children property.
       addInstanceInstruction(instanceName + ".getColumns().add(" + createSubNode.instanceName + ");");
-      
-      //Add the field reference if the element has an fx:id attribute.
-      //String tcolID = elTCol.getAttribute("fx:id");
-      //if(!tcolID.isBlank()) 
     }
-    
-    
-    //Finish postfix create children.
-  //  sb.append(");");
   }  
 }
