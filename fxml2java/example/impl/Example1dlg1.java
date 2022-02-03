@@ -1,21 +1,3 @@
-/**
-Licensed to the Apache Software Foundation (ASF) under one
-or more contributor license agreements.  See the NOTICE file
-distributed with this work for additional information
-regarding copyright ownership.  The ASF licenses this file
-to you under the Apache License, Version 2.0 (the
-"License"); you may not use this file except in compliance
-with the License.  You may obtain a copy of the License at
-
-  http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing,
-software distributed under the License is distributed on an
-"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, either express or implied.  See the License for the
-specific language governing permissions and limitations
-under the License.    
- */
 package fxml2java.example.impl;
 
 import javafx.fxml.FXML;
@@ -37,15 +19,16 @@ public class Example1dlg1
   private CheckBox chkCheck;
   @FXML
   private ResourceBundle resourceBundle;
-  
-  public Example1dlg1(ResourceBundle resourceBundle)
-  {
+
+
+  public Example1dlg1(ResourceBundle resourceBundle) {
     this.resourceBundle = resourceBundle;
     setupFX();
     setTextStrings();
     userConfig();
-  }
-  
+    }
+
+
   private void setupFX()
   {
     chbChoices = new ChoiceBox<>();
@@ -73,48 +56,50 @@ public class Example1dlg1
     vboxLINST0000.getChildren().addAll(vboxLINST0001);
     
   }
-  
+
   private void setTextStrings()
   {
     chkCheck.setText(resourceBundle.getString("dlg1.chk.lbl"));
   }
-  
-  public void resourceUpdate(ResourceBundle resourceBundle)
-  {
-    this.resourceBundle = resourceBundle;
-    setTextStrings();
-  }
-  
+
   public VBox getMainContainer()
   {
     return vboxLINST0000;
   }
-  
-  private void userConfig()
-  {
-    //Set up the selections in the choice box.
+
+  public void resourceUpdate(ResourceBundle resourceBundle) {
+    this.resourceBundle = resourceBundle;
+    setTextStrings();
+    }
+
+
+  private void userConfig() {
+    // Set up the selections in the choice box.
     chbChoices.getItems().addAll(resourceBundle.getString("dlg1.chb.ch1"), resourceBundle.getString("dlg1.chb.ch2"), resourceBundle.getString("dlg1.chb.ch3"));
-  }
-  
+    }
+
+
   /**
-   * <p>
-   * Reset the form.
-   */
-  public void resetForm()
-  {
+  * <p>
+  * Reset the form.
+  */
+  public void resetForm() {
     chkCheck.selectedProperty().set(false);
     chbChoices.selectionModelProperty().get().clearSelection();
-  }
-  
+    }
+
+
   /**
-   * <p>
-   * Return the dialogue state information.
-   *
-   * @return
-   */
-  public Example1Dialogue1Item dialogueState()
-  {
+  * <p>
+  * Return the dialogue state information.
+  *
+  * @return
+  */
+  public Example1Dialogue1Item dialogueState() {
     return new Example1Dialogue1Item(chkCheck.selectedProperty().get(), chbChoices.selectionModelProperty().get().getSelectedItem());
-  }
-  
+    }
+
+
+
 }
+

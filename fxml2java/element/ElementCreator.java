@@ -18,7 +18,13 @@ under the License.
  */
 package fxml2java.element;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import fxml2java.IDManager;
 
@@ -41,6 +47,12 @@ public class ElementCreator
   private final FXMLJavaDescriptorImpl fjd;
   
   /**
+   * <p>Elememnt creation map.  Contains one FXMLElementResponse per FXML element name.  The FXMLElementResponse
+   * instance can be used to create an FXML element of the requested type.
+   */
+  private final Map<String, FXMLElementResponse> elementCreationMap = new HashMap<>();
+  
+  /**
    * <p>Constructor.
    * 
    * @param idm
@@ -50,6 +62,43 @@ public class ElementCreator
   {
     this.idm = idm;
     this.fjd = fjd;
+    
+    //Set up all FXML element responders.
+    //
+    //Standard ones.
+    FXMLElementResponse stdFXMLEle = (e) -> {return new FXMLElement(e, this);};
+    FXMLElementResponse labelledFXMLEle = (e) -> {return new LabeledElement(e, this);};
+    FXMLElementResponse regionFXMLEle = (e) -> {return new RegionElement(e, this);};
+    
+    //Mappings for element creation.
+    //Specific implementations.
+    elementCreationMap.put("GridPane", (e) -> {return new GridPaneElement(e, this);});
+    elementCreationMap.put("TableView", (e) -> {return new TableViewElement(e, this);});
+    elementCreationMap.put("TreeTableView", (e) -> {return new TreeTableViewElement(e, this);});
+    elementCreationMap.put("TabPane", (e) -> {return new TabPaneElement(e, this);});
+    elementCreationMap.put("BorderPane", (e) -> {return new BorderPaneElement(e, this);});
+    elementCreationMap.put("Tab", (e) -> {return new TabElement(e, this);});
+    //Standard implementations.
+    elementCreationMap.put("ComboBox", regionFXMLEle);
+    elementCreationMap.put("VBox", regionFXMLEle);
+    elementCreationMap.put("HBox", regionFXMLEle);
+    elementCreationMap.put("StackPane", regionFXMLEle);
+    elementCreationMap.put("ListView", regionFXMLEle);
+    elementCreationMap.put("Separator", regionFXMLEle);
+
+    elementCreationMap.put("Label", labelledFXMLEle);
+    elementCreationMap.put("RadioButton", labelledFXMLEle);
+    elementCreationMap.put("CheckBox", labelledFXMLEle);
+    elementCreationMap.put("ChoiceBox", labelledFXMLEle);
+    elementCreationMap.put("Button", labelledFXMLEle);
+
+    elementCreationMap.put("TableColumn", stdFXMLEle);
+    elementCreationMap.put("TreeTableColumn", stdFXMLEle);
+    elementCreationMap.put("TextField", stdFXMLEle);
+    elementCreationMap.put("TextArea", stdFXMLEle);
+    elementCreationMap.put("PasswordField", stdFXMLEle);
+    elementCreationMap.put("ImageView", stdFXMLEle);
+    elementCreationMap.put("Text", stdFXMLEle);
   }
 
   /**
@@ -63,51 +112,49 @@ public class ElementCreator
     //Get the element name.
     String elName = element.getNodeName();
     
-    //Create an FXMLElement instance depending on the element name (which gives the type).
-    switch(elName)
+    //Check for fx:root.  This needs to be handled differently.
+    if("fx:root".equals(elName))
     {
-      case "GridPane":
-        return new GridPaneElement(element, this);
-      case "TableView":
-        return new TableViewElement(element, this);
-      case "TreeTableView":
-        return new TreeTableViewElement(element, this);
-      case "TabPane":
-        return new TabPaneElement(element, this);
-      case "BorderPane":
-        return new BorderPaneElement(element, this);
-      //ALL GENERIC REGION ELEMENTS HERE.  THESE ARE ELEMENTS THAT HAVE NO EXTENDED FUNCTIONALITY BEYOND THE JAVAFX REGION CLASS 
-      //AND ARE COMPLETELY DEALT WITH WITHIN THAT CLASS.
-      case "Tab":
-        return new TabElement(element, this);
-      case "ComboBox":
-      case "VBox":
-      case "HBox":
-      case "StackPane":
-      case "ListView":
-      case "Separator":
-        return new RegionElement(element, this);
-      //ALL GENERIC LABELED ELEMENTS HERE.  THESE ARE ELEMENTS THAT HAVE NO EXTENDED FUNCTIONALITY BEYOND THE JAVAFX LABELED CLASS 
-      //AND ARE COMPLETELY DEALT WITH WITHIN THAT CLASS.
-      case "Label":
-      case "RadioButton":
-      case "CheckBox":
-      case "ChoiceBox":
-      case "Button":
-        return new LabeledElement(element, this);
-      //ALL GENERIC FXML ELEMENTS HERE.  THESE ARE ELEMENTS THAT HAVE NO EXTENDED FUNCTIONALITY AND ARE COMPLETELY DEALT WITH
-      //WITHIN THE BASE FXMLElement CLASS.
-      case "TableColumn":
-      case "TreeTableColumn":
-      case "TextField":
-      case "TextArea":
-      case "PasswordField":
-      case "ImageView":
-      case "Text":
-        return new FXMLElement(element, this);
-      default:
-        throw new IllegalArgumentException("No processor available for element type [" + elName + "].  Please add a processor for this type.");
+      //SPECIAL CASE FOR <fx:root ...> elements.  This element will contain a type attribute which specifies the fx object type name.
+      String typeAttr = element.getAttribute("type");
+      //Replace the fx:root with an element with the given type name.
+      fjd.addImport(typeAttr);
+      //Element name is only last segment of fully-qualified name.
+      String elementName = typeAttr.substring(typeAttr.lastIndexOf('.') + 1);
+      //Create the element.
+      Element createdElement = element.getOwnerDocument().createElement(elementName);
+      //Add all attributes of the fx:root element, apart from the type attribute.
+      NamedNodeMap attributes = element.getAttributes();
+      for(int i = 0; i < attributes.getLength(); i++)
+      {
+        Node attr = attributes.item(i);
+        if(!"type".equals(attr.getNodeName())) createdElement.getAttributes().setNamedItem(attr.cloneNode(true));
+      }
+      
+      //Deep copy all sub elements of original.
+      NodeList subelements = element.getChildNodes();
+      for(int i = 0; i < subelements.getLength(); i++)
+      {
+        Node subnode = subelements.item(i);
+        createdElement.appendChild(subnode.cloneNode(true));
+      }
+      
+      
+      //Set the element to create from the fx:root of the parameter to the one we have created.
+      element = createdElement;
+      
+      //Update the element name.
+      elName = element.getNodeName();
     }
+      
+    //Look up the element from the map.
+    FXMLElementResponse fxmlElementResponse = elementCreationMap.get(elName);
+    
+    //Check for not null - if null then a handler for the element doesn't exist and needs to be added!
+    if(fxmlElementResponse != null) return fxmlElementResponse.createElement(element);
+    
+    //Still here - no element handler for the requested element type.
+    throw new IllegalArgumentException("No processor available for element type [" + elName + "].  Please add a processor for this type.");
   }
 
   /**
@@ -130,5 +177,19 @@ public class ElementCreator
     return fjd;
   }
 
+  private interface FXMLElementResponse
+  {
+    FXMLElement createElement(Element element);
+  }
   
+  /**
+   * <p>Returns true if the given FXML element describes a javafx.scene.Node descendant that can be handled by this ElementCreator.
+   * 
+   * @param el
+   * @return
+   */
+  public boolean isJavaFXElement(Element el)
+  {
+    return elementCreationMap.containsKey(el.getNodeName());
+  }
 }

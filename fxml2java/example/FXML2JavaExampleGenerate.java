@@ -41,7 +41,8 @@ public class FXML2JavaExampleGenerate
     FXML2Java f2j = new FXML2Java();
     
     //Convert the basis directory.
-    f2j.convertDirectory("D:\\Repository\\Tools\\FXML2Java\\src\\fxml2java\\example\\basis", "D:\\Repository\\Tools\\FXML2Java\\src\\");
+    //REPLACE THIS WITH THE LOCATION OF THE BASIS DIRECTORY ON YOUR LOCAL INSTALLATION
+    f2j.convertDirectory("D:\\Code\\Tools\\fxml2java\\fxml2java\\example\\basis", "D:\\Code\\Tools\\fxml2java");
   }
   
 }

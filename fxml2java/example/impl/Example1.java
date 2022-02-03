@@ -1,21 +1,3 @@
-/**
-Licensed to the Apache Software Foundation (ASF) under one
-or more contributor license agreements.  See the NOTICE file
-distributed with this work for additional information
-regarding copyright ownership.  The ASF licenses this file
-to you under the Apache License, Version 2.0 (the
-"License"); you may not use this file except in compliance
-with the License.  You may obtain a copy of the License at
-
-  http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing,
-software distributed under the License is distributed on an
-"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, either express or implied.  See the License for the
-specific language governing permissions and limitations
-under the License.    
- */
 package fxml2java.example.impl;
 
 import javafx.scene.control.Button;
@@ -28,8 +10,6 @@ import fxml2java.util.Util;
 import javafx.scene.control.TableColumn;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert.AlertType;
-
-import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.scene.shape.StrokeType;
 import javafx.scene.control.TableView;
@@ -49,6 +29,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.event.ActionEvent;
 import javafx.scene.control.RadioButton;
 import javafx.scene.image.ImageView;
+import java.util.Optional;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.image.Image;
 
@@ -84,10 +65,9 @@ public class Example1
   private ResourceBundle resourceBundle;
   
   private int tableItemCount = 0;
-  
-  //Create dialogue box.
+  // Create dialogue box.
   private Example1Dialogue1 e1d1;
-
+  
   public Example1(ResourceBundle resourceBundle)
   {
     this.resourceBundle = resourceBundle;
@@ -300,22 +280,21 @@ public class Example1
     btnShowDlg.setText(resourceBundle.getString("button.dlg.lbl"));
   }
   
+  public VBox getMainContainer()
+  {
+    return vboxLINST0000;
+  }
+  
   public void resourceUpdate(ResourceBundle resourceBundle)
   {
     this.resourceBundle = resourceBundle;
     setTextStrings();
   }
   
-  public VBox getMainContainer()
-  {
-    return vboxLINST0000;
-  }
-  
   private void userConfig()
   {
-    //Create dialogue box.
+    // Create dialogue box.
     e1d1 = new Example1Dialogue1(resourceBundle);
-        
     // Set up the table column value factory.
     tclCol1.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TableItem, String>, ObservableValue<String>>()
     {
@@ -367,30 +346,30 @@ public class Example1
   }
   
   /**
-   * <p>Show the dialogue box and report what happened.
-   * 
+   * <p>
+   * Show the dialogue box and report what happened.
+   *
    * @param evt
    */
   private void actShowDialogue(ActionEvent evt)
   {
-    //Reset the dialogue and show it.
+    // Reset the dialogue and show it.
     e1d1.resetForm();
     Optional<Example1Dialogue1Item> showAndWait = e1d1.showAndWait();
-    //Action from dialogue.
-    if(showAndWait.isPresent())
+    // Action from dialogue.
+    if (showAndWait.isPresent())
     {
-      //Get the result.
+      // Get the result.
       Example1Dialogue1Item res = showAndWait.get();
-      
-      //Build the result.
-      String s1 = resourceBundle.getString( (res.isChecked()) ? "dlg1.res.chk" : "dlg1.res.nochk");
-      String s2 = (res.getChosenItem() != null) ? resourceBundle.getString("dlg1.res.chb") + res.getChosenItem() :  resourceBundle.getString("dlg1.res.nochb");
+      // Build the result.
+      String s1 = resourceBundle.getString((res.isChecked()) ? "dlg1.res.chk" : "dlg1.res.nochk");
+      String s2 = (res.getChosenItem() != null) ? resourceBundle.getString("dlg1.res.chb") + res.getChosenItem() : resourceBundle.getString("dlg1.res.nochb");
       Alert alt = new Alert(AlertType.INFORMATION, s1 + "\n" + s2);
       alt.show();
     }
     else
     {
-      //Cancelled.
+      // Cancelled.
       Alert alt = new Alert(AlertType.ERROR, resourceBundle.getString("dlg1.res.cancel"));
       alt.show();
     }

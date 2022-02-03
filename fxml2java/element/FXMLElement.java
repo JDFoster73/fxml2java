@@ -256,7 +256,7 @@ public class FXMLElement
       Attr item = (Attr) attributes.item(i);
       
       //Add instructions for the attribute.
-      handleAttribute(item, instanceNameToUse);
+      handlePropertyAttribute(item, instanceNameToUse);
     }
   }
   
@@ -302,7 +302,7 @@ public class FXMLElement
    * @param attribute
    * @param subElementID 
    */
-  private void handleAttribute(Attr attribute, String subElementID)
+  private void handlePropertyAttribute(Attr attribute, String subElementID)
   {
     //Get the attribute name.
     String qName = attribute.getName();
@@ -545,6 +545,11 @@ public class FXMLElement
     //Handle sub elements depending on their name.
     switch(subElementName)
     {
+      ///////////////////////////////////////////////////////////////////////// FXLM ELEMENTS.
+      //FXML MAIN ELEMENTS
+      case "":
+        
+      ///////////////////////////////////////////////////////////////////////// NON-FXLM ELEMENTS.
       //Static insets.
       case "VBox.margin":
       case "HBox.margin":
