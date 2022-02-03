@@ -63,19 +63,19 @@ public class Example1
   private Button btnShowDlg;
   @FXML
   private ResourceBundle resourceBundle;
-  
+
   private int tableItemCount = 0;
   // Create dialogue box.
-  private Example1Dialogue1 e1d1;
-  
-  public Example1(ResourceBundle resourceBundle)
-  {
+private Example1Dialogue1 e1d1;
+
+  public Example1(ResourceBundle resourceBundle) {
     this.resourceBundle = resourceBundle;
     setupFX();
     setTextStrings();
     userConfig();
-  }
-  
+    }
+
+
   private void setupFX()
   {
     Text textLINST0002 = new Text();
@@ -94,23 +94,17 @@ public class Example1
     
     btnLeftPanel1 = new Button();
     btnLeftPanel1.setMnemonicParsing(false);
-    btnLeftPanel1.setOnAction((e) -> {
-      onBtnLeft1(e);
-    });
+    btnLeftPanel1.setOnAction((e) -> {onBtnLeft1(e);});
     btnLeftPanel1.setPrefWidth(10000.0);
     
     btnLeftPanel2 = new Button();
     btnLeftPanel2.setMnemonicParsing(false);
-    btnLeftPanel2.setOnAction((e) -> {
-      onBtnLeft2(e);
-    });
+    btnLeftPanel2.setOnAction((e) -> {onBtnLeft2(e);});
     btnLeftPanel2.setPrefWidth(10000.0);
     
     btnLeftPanel3 = new Button();
     btnLeftPanel3.setMnemonicParsing(false);
-    btnLeftPanel3.setOnAction((e) -> {
-      onBtnLeft3(e);
-    });
+    btnLeftPanel3.setOnAction((e) -> {onBtnLeft3(e);});
     btnLeftPanel3.setPrefWidth(10000.0);
     
     RadioButton radiobuttonLINST0006 = new RadioButton();
@@ -156,9 +150,7 @@ public class Example1
     
     btnRHSAddTItem = new Button();
     btnRHSAddTItem.setMnemonicParsing(false);
-    btnRHSAddTItem.setOnAction((e) -> {
-      onRHSAddTItem(e);
-    });
+    btnRHSAddTItem.setOnAction((e) -> {onRHSAddTItem(e);});
     btnRHSAddTItem.setGraphic(imageviewLINST0010);
     
     tclCol1 = new TableColumn<>();
@@ -232,9 +224,7 @@ public class Example1
     
     btnShowDlg = new Button();
     btnShowDlg.setMnemonicParsing(false);
-    btnShowDlg.setOnAction((e) -> {
-      actShowDialogue(e);
-    });
+    btnShowDlg.setOnAction((e) -> {actShowDialogue(e);});
     
     HBox hboxLINST0020 = new HBox();
     hboxLINST0020.setAlignment(Pos.CENTER);
@@ -264,11 +254,12 @@ public class Example1
     vboxLINST0000.setMinWidth(Double.NEGATIVE_INFINITY);
     vboxLINST0000.setPrefHeight(536.0);
     vboxLINST0000.setPrefWidth(829.0);
-    vboxLINST0000.getChildren().addAll(hboxLINST0001, hboxLINST0003);
+    vboxLINST0000.getChildren().add(hboxLINST0001);
+    vboxLINST0000.getChildren().add(hboxLINST0003);
     vboxLINST0000.setPadding(new Insets(Double.parseDouble("0.0"), Double.parseDouble("10.0"), Double.parseDouble("0.0"), Double.parseDouble("0.0")));
     
   }
-  
+
   private void setTextStrings()
   {
     btnLeftPanel1.setText(resourceBundle.getString("button1.txt"));
@@ -279,100 +270,95 @@ public class Example1
     tclCol2.setText(resourceBundle.getString("table.column2.title"));
     btnShowDlg.setText(resourceBundle.getString("button.dlg.lbl"));
   }
-  
+
   public VBox getMainContainer()
   {
     return vboxLINST0000;
   }
-  
-  public void resourceUpdate(ResourceBundle resourceBundle)
-  {
+
+  public void resourceUpdate(ResourceBundle resourceBundle) {
     this.resourceBundle = resourceBundle;
     setTextStrings();
-  }
-  
-  private void userConfig()
-  {
+    }
+
+
+  private void userConfig() {
     // Create dialogue box.
     e1d1 = new Example1Dialogue1(resourceBundle);
     // Set up the table column value factory.
-    tclCol1.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TableItem, String>, ObservableValue<String>>()
-    {
+    tclCol1.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TableItem, String>, ObservableValue<String>>() {
       @Override
-      public ObservableValue<String> call(CellDataFeatures<TableItem, String> arg0)
-      {
+      public ObservableValue<String> call(CellDataFeatures<TableItem, String> arg0) {
         // TODO Auto-generated method stub
         return new SimpleStringProperty(arg0.getValue().getC1());
-      }
-    });
-    tclCol2.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TableItem, String>, ObservableValue<String>>()
-    {
-      @Override
-      public ObservableValue<String> call(CellDataFeatures<TableItem, String> arg0)
-      {
-        // TODO Auto-generated method stub
-        return new SimpleStringProperty(arg0.getValue().getC2());
-      }
-    });
-    // Use the toggle group to set the text of the non-editable text fields.
-    tg1.selectedToggleProperty().addListener((a, b, c) -> {
-      txtRHBTxt1.setText(((RadioButton) c).getText());
-      txtRHBTxt2.setText(((RadioButton) c).getText());
-      txtRHBTxt3.setText(((RadioButton) c).getText());
-    });
-  }
-  
-  private void onBtnLeft1(ActionEvent evt)
-  {
-    Alert a1 = new Alert(AlertType.CONFIRMATION, resourceBundle.getString("button1.lrt"));
-    a1.showAndWait();
-  }
-  
-  private void onBtnLeft2(ActionEvent evt)
-  {
-    Alert a1 = new Alert(AlertType.ERROR, resourceBundle.getString("button2.lrt"));
-    a1.showAndWait();
-  }
-  
-  private void onBtnLeft3(ActionEvent evt)
-  {
-    Alert a1 = new Alert(AlertType.WARNING, resourceBundle.getString("button3.lrt"));
-    a1.showAndWait();
-  }
-  
-  private void onRHSAddTItem(ActionEvent evt)
-  {
-    tblItemTable.getItems().add(new TableItem("Col 1#" + tableItemCount, "Col 2#" + tableItemCount++));
-  }
-  
-  /**
-   * <p>
-   * Show the dialogue box and report what happened.
-   *
-   * @param evt
-   */
-  private void actShowDialogue(ActionEvent evt)
-  {
-    // Reset the dialogue and show it.
-    e1d1.resetForm();
-    Optional<Example1Dialogue1Item> showAndWait = e1d1.showAndWait();
-    // Action from dialogue.
-    if (showAndWait.isPresent())
-    {
-      // Get the result.
-      Example1Dialogue1Item res = showAndWait.get();
-      // Build the result.
-      String s1 = resourceBundle.getString((res.isChecked()) ? "dlg1.res.chk" : "dlg1.res.nochk");
-      String s2 = (res.getChosenItem() != null) ? resourceBundle.getString("dlg1.res.chb") + res.getChosenItem() : resourceBundle.getString("dlg1.res.nochb");
-      Alert alt = new Alert(AlertType.INFORMATION, s1 + "\n" + s2);
-      alt.show();
-    }
-    else
-    {
-      // Cancelled.
-      Alert alt = new Alert(AlertType.ERROR, resourceBundle.getString("dlg1.res.cancel"));
-      alt.show();
-    }
-  }
-  
-}
+        }
+      });
+      tclCol2.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TableItem, String>, ObservableValue<String>>() {
+        @Override
+        public ObservableValue<String> call(CellDataFeatures<TableItem, String> arg0) {
+          // TODO Auto-generated method stub
+          return new SimpleStringProperty(arg0.getValue().getC2());
+          }
+        });
+        // Use the toggle group to set the text of the non-editable text fields.
+        tg1.selectedToggleProperty().addListener((a, b, c) -> {
+          txtRHBTxt1.setText(((RadioButton) c).getText());
+          txtRHBTxt2.setText(((RadioButton) c).getText());
+          txtRHBTxt3.setText(((RadioButton) c).getText());
+          });
+          }
+
+
+        private void onBtnLeft1(ActionEvent evt) {
+          Alert a1 = new Alert(AlertType.CONFIRMATION, resourceBundle.getString("button1.lrt"));
+          a1.showAndWait();
+          }
+
+
+        private void onBtnLeft2(ActionEvent evt) {
+          Alert a1 = new Alert(AlertType.ERROR, resourceBundle.getString("button2.lrt"));
+          a1.showAndWait();
+          }
+
+
+        private void onBtnLeft3(ActionEvent evt) {
+          Alert a1 = new Alert(AlertType.WARNING, resourceBundle.getString("button3.lrt"));
+          a1.showAndWait();
+          }
+
+
+        private void onRHSAddTItem(ActionEvent evt) {
+          tblItemTable.getItems().add(new TableItem("Col 1#" + tableItemCount, "Col 2#" + tableItemCount++));
+          }
+
+
+        /**
+        * <p>
+        * Show the dialogue box and report what happened.
+        *
+        * @param evt
+        */
+        private void actShowDialogue(ActionEvent evt) {
+          // Reset the dialogue and show it.
+          e1d1.resetForm();
+          Optional<Example1Dialogue1Item> showAndWait = e1d1.showAndWait();
+          // Action from dialogue.
+          if (showAndWait.isPresent()) {
+            // Get the result.
+            Example1Dialogue1Item res = showAndWait.get();
+            // Build the result.
+            String s1 = resourceBundle.getString((res.isChecked()) ? "dlg1.res.chk" : "dlg1.res.nochk");
+            String s2 = (res.getChosenItem() != null) ? resourceBundle.getString("dlg1.res.chb") + res.getChosenItem() : resourceBundle.getString("dlg1.res.nochb");
+            Alert alt = new Alert(AlertType.INFORMATION, s1 + "\n" + s2);
+            alt.show();
+            } else {
+              // Cancelled.
+              Alert alt = new Alert(AlertType.ERROR, resourceBundle.getString("dlg1.res.cancel"));
+              alt.show();
+              }
+            }
+
+
+
+        }
+

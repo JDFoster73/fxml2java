@@ -19,7 +19,6 @@
 <?import javafx.scene.text.Text?>
 
 <fx:root type="javafx.scene.layout.VBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="536.0" prefWidth="829.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1">
-   <children>
       <HBox alignment="CENTER" prefWidth="200.0" VBox.vgrow="NEVER">
          <children>
             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%title">
@@ -111,7 +110,6 @@
             </VBox>
          </children>
       </HBox>
-   </children>
    <padding>
       <Insets right="10.0" />
    </padding>

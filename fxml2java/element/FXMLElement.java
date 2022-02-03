@@ -542,93 +542,106 @@ public class FXMLElement
     //Get the sub-element name.
     String subElementName = element.getNodeName();
     
-    //Handle sub elements depending on their name.
-    switch(subElementName)
+    ///////////////////////////////////////////////////////////////////////// FXLM ELEMENTS.
+    //FXML MAIN ELEMENTS
+    if(elementCreator.isJavaFXElement(element))
     {
-      ///////////////////////////////////////////////////////////////////////// FXLM ELEMENTS.
-      //FXML MAIN ELEMENTS
-      case "":
-        
-      ///////////////////////////////////////////////////////////////////////// NON-FXLM ELEMENTS.
-      //Static insets.
-      case "VBox.margin":
-      case "HBox.margin":
-      case "GridPane.margin":
-        //Get type - subElementName upto '.'
-        String typ = subElementName.substring(0, subElementName.indexOf("."));
-        
-        //Get the <Insets>
-        Element insetsEl = (Element) element.getElementsByTagName("Insets").item(0);
-        
-        //handleStaticInsets(instanceName, typ, el);
-        addInstanceInstruction(typ + ".setMargin(" + instanceName + ", " + getInsetsCreateInstruction(insetsEl) + ");");
-        break;
-      case "image":
-        //Get the <Image> subelement.
-        Element imageEl = (Element) element.getElementsByTagName("Image").item(0);
-        
-        //Get the 'url' attribute from the element.
-        String urlString = imageEl.getAttribute("url");
-        //Strip off leading '@'
-        if(urlString.startsWith("@")) urlString = urlString.substring(1);
-        
-        //Check to see if the path is absolute.  If relative then inject the relative path calculator.
-        if(!urlString.startsWith(File.pathSeparator))
-        {
-          //Find the resource in the classpath.
-          urlString = Util.findRelativeResourceLocation(elementCreator.getDescriptor().sourceLocation, urlString);
-        }
-        
-        //Constructor argument.
-        String cArg = "new Image(getClass().getResourceAsStream(\"" + urlString + "\"))";
+      //Use the element creator to create the element and add as a child.
+      FXMLElement createElement = elementCreator.createElement(element);
+      
+      //Add element instructions and register element as a child.
+      subNodeList.add(createElement);
+      
+      //Create an add child instruction.
+      addInstanceInstruction(this.instanceName + ".getChildren().add(" + createElement.instanceName + ");");
+    }
+    else
+    {
+      //Handle sub elements depending on their name.
+      switch(subElementName)
+      {
+        ///////////////////////////////////////////////////////////////////////// NON-FXLM ELEMENTS.
+        //Static insets.
+        case "VBox.margin":
+        case "HBox.margin":
+        case "GridPane.margin":
+          //Get type - subElementName upto '.'
+          String typ = subElementName.substring(0, subElementName.indexOf("."));
+          
+          //Get the <Insets>
+          Element insetsEl = (Element) element.getElementsByTagName("Insets").item(0);
+          
+          //handleStaticInsets(instanceName, typ, el);
+          addInstanceInstruction(typ + ".setMargin(" + instanceName + ", " + getInsetsCreateInstruction(insetsEl) + ");");
+          break;
+        case "image":
+          //Get the <Image> subelement.
+          Element imageEl = (Element) element.getElementsByTagName("Image").item(0);
+          
+          //Get the 'url' attribute from the element.
+          String urlString = imageEl.getAttribute("url");
+          //Strip off leading '@'
+          if(urlString.startsWith("@")) urlString = urlString.substring(1);
+          
+          //Check to see if the path is absolute.  If relative then inject the relative path calculator.
+          if(!urlString.startsWith(File.pathSeparator))
+          {
+            //Find the resource in the classpath.
+            urlString = Util.findRelativeResourceLocation(elementCreator.getDescriptor().sourceLocation, urlString);
+          }
+          
+          //Constructor argument.
+          String cArg = "new Image(getClass().getResourceAsStream(\"" + urlString + "\"))";
 
-        //Add to the container.
-        //Add declaration.
-        addInstanceInstruction(instanceName + ".setImage(" + cArg + ");");
-        
-        break;
-      case "opaqueInsets":
-        //Get the insets creation subcommand.
-        String opaqueInsets = getInsetsCreateInstruction((Element) element.getElementsByTagName("Insets").item(0));
-        //Add the set insets command.
-        addInstanceInstruction(instanceName + ".setOpaqueInsets(" + opaqueInsets + ");");
-        break;
-      case "font":
-        //Contains a <Font> element.
-        Element fontEl = Util.getFirstXMLElement(element);
-        //Font instance name.
-        String fontName;
-        String fontSize;
-        //Get the font parameters.  These are not properties; each Font instance is immutable and is created with the constructor only.
-        if(!"".equals(fontName = fontEl.getAttribute("name")) && !"".equals(fontSize = fontEl.getAttribute("size")))
-        {
-          //Create the Font instance and set the containing instance's setFont(...) method.
-          //createElementInstructions(fontEl, fontInst = createInstanceName(fontEl));
-          //Add the prefix instruction.
-          addInstanceInstruction(instanceName + ".setFont(new Font(\"" + fontName + "\", " + fontSize + "));");
-        }
-        else
-        {
-          //Currently we can only handle a Font declaration with a name and size attribute.
-          throw new IllegalStateException("Don't know how to process font with the given attributes.  An attribute handler is required.");
-        }
-        break;
-      case "toggleGroup":
-        //Handle the toggle group declaration.
-        //The first child element is <ToggleGroup>, which contains the group name as an fx:id attribute.
-        String groupString = ( (Element) element.getElementsByTagName("ToggleGroup").item(0)).getAttribute("fx:id");
-        //Toggle groups are always fields because they have an fx:id and there's no way to specify if they should be fields or not
-        //in SceneBuilder.
-        elementCreator.getDescriptor().addField("ToggleGroup " + groupString);
-        //Create the group.
-        addInstanceInstruction(groupString + " = new ToggleGroup();");
-        //Check the import for ToggleGroup exists.
-        elementCreator.getDescriptor().addImport("javafx.scene.control.ToggleGroup");
-        //Set the toggle group property of the owning instance.
-        addInstanceInstruction(instanceName + ".setToggleGroup(" + groupString + ");");
-        break;
-      default:
-        throw new IllegalStateException("Don't know how to process child node of type " + subElementName);
+          //Add to the container.
+          //Add declaration.
+          addInstanceInstruction(instanceName + ".setImage(" + cArg + ");");
+          
+          break;
+        case "opaqueInsets":
+          //Get the insets creation subcommand.
+          String opaqueInsets = getInsetsCreateInstruction((Element) element.getElementsByTagName("Insets").item(0));
+          //Add the set insets command.
+          addInstanceInstruction(instanceName + ".setOpaqueInsets(" + opaqueInsets + ");");
+          break;
+        case "font":
+          //Contains a <Font> element.
+          Element fontEl = Util.getFirstXMLElement(element);
+          //Font instance name.
+          String fontName;
+          String fontSize;
+          //Get the font parameters.  These are not properties; each Font instance is immutable and is created with the constructor only.
+          if(!"".equals(fontName = fontEl.getAttribute("name")) && !"".equals(fontSize = fontEl.getAttribute("size")))
+          {
+            //Create the Font instance and set the containing instance's setFont(...) method.
+            //createElementInstructions(fontEl, fontInst = createInstanceName(fontEl));
+            //Add the prefix instruction.
+            addInstanceInstruction(instanceName + ".setFont(new Font(\"" + fontName + "\", " + fontSize + "));");
+          }
+          else
+          {
+            //Currently we can only handle a Font declaration with a name and size attribute.
+            throw new IllegalStateException("Don't know how to process font with the given attributes.  An attribute handler is required.");
+          }
+          break;
+        case "toggleGroup":
+          //Handle the toggle group declaration.
+          //The first child element is <ToggleGroup>, which contains the group name as an fx:id attribute.
+          String groupString = ( (Element) element.getElementsByTagName("ToggleGroup").item(0)).getAttribute("fx:id");
+          //Toggle groups are always fields because they have an fx:id and there's no way to specify if they should be fields or not
+          //in SceneBuilder.
+          elementCreator.getDescriptor().addField("ToggleGroup " + groupString);
+          //Create the group.
+          addInstanceInstruction(groupString + " = new ToggleGroup();");
+          //Check the import for ToggleGroup exists.
+          elementCreator.getDescriptor().addImport("javafx.scene.control.ToggleGroup");
+          //Set the toggle group property of the owning instance.
+          addInstanceInstruction(instanceName + ".setToggleGroup(" + groupString + ");");
+          break;
+        default:
+          //Still here.  We can't find anything that is able to process the requested element.
+          throw new IllegalStateException("Don't know how to process child node of type " + subElementName);
+      }
     }
   }
   
