@@ -78,6 +78,12 @@ public class ElementCreator
     elementCreationMap.put("TabPane", (e) -> {return new TabPaneElement(e, this);});
     elementCreationMap.put("BorderPane", (e) -> {return new BorderPaneElement(e, this);});
     elementCreationMap.put("Tab", (e) -> {return new TabElement(e, this);});
+    //elementCreationMap.put("RadioButton", (e) -> {return new RadioButtonElement(e, this);});
+    elementCreationMap.put("Color", (e) -> {return new ColorElement(e, this);});
+    elementCreationMap.put("Insets", (e) -> {return new InsetsElement(e, this);});
+    elementCreationMap.put("Font", (e) -> {return new FontElement(e, this);});
+    elementCreationMap.put("Image", (e) -> {return new ImageElement(e, this);});
+    
     //Standard implementations.
     elementCreationMap.put("ComboBox", regionFXMLEle);
     elementCreationMap.put("VBox", regionFXMLEle);
@@ -99,6 +105,16 @@ public class ElementCreator
     elementCreationMap.put("PasswordField", stdFXMLEle);
     elementCreationMap.put("ImageView", stdFXMLEle);
     elementCreationMap.put("Text", stdFXMLEle);
+    
+    elementCreationMap.put("ColumnConstraints", stdFXMLEle);
+    elementCreationMap.put("RowConstraints", stdFXMLEle);
+    
+    elementCreationMap.put("ToggleGroup", stdFXMLEle);
+//    elementCreationMap.put("Font", stdFXMLEle);
+//    elementCreationMap.put("Insets", stdFXMLEle);
+//    elementCreationMap.put("Image", stdFXMLEle);
+    
+    
   }
 
   /**

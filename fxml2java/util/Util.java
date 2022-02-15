@@ -15,6 +15,9 @@ package fxml2java.util;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -212,4 +215,75 @@ public class Util
     return null;
   }
 
+  public static Iterator<Element> getSubElementIterator(Element element)
+  {
+    return new SubElementIterator(element);
+  }
+  
+  private static class SubElementIterator implements Iterator<Element>
+  {
+    /*
+     * The parent element.
+     */
+    final Element parent;
+    
+    /*
+     * Index of next sub element in the parent element.
+     */
+    int nextIX = 0;
+    
+    private SubElementIterator(Element el)
+    {
+      //Store parent ref.
+      this.parent = el;
+
+      //Find the first element if it exists.
+      findNext();
+    }
+
+    private final void findNext()
+    {
+      //Find the next element if it exists.
+      NodeList childNodes = parent.getChildNodes();
+      for(int i = ++nextIX; i < childNodes.getLength(); i++)
+      {
+        //Any Element node.
+        if(childNodes.item(i).getNodeType() == Node.ELEMENT_NODE) 
+        {
+          //Update next index.
+          nextIX = i;
+          
+          //Complete - return.
+          return;
+        }
+      }
+      
+      //Nothing found.  Set next ix to -1.
+      nextIX = -1;
+    }
+    
+    @Override
+    public boolean hasNext()
+    {
+      // nextIX is not -1.
+      return nextIX != -1;
+    }
+
+    @Override
+    public Element next()
+    {
+      //Next element exists?
+      if(nextIX == -1) throw new NoSuchElementException();
+      
+      //Store the index to return.
+      int retIX = nextIX;
+      
+      //Find the next element if it exists.
+      findNext();
+      
+      // Return the element at the return index.
+      return (Element) parent.getChildNodes().item(retIX);
+    }
+    
+  }
 }

@@ -18,11 +18,10 @@ under the License.
  */
 package fxml2java.element;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
@@ -61,7 +60,7 @@ public class FXMLElement
   /**
    * <p>True if this instance is specified as a field. 
    */
-  private final boolean isField;
+  public final boolean isField;
   
   /**
    * <p>The element creator for accessing the descriptor and creating nested sub-elements.
@@ -79,6 +78,11 @@ public class FXMLElement
   private final List<FXMLElement> subNodeList = new ArrayList<>();
 
   /**
+   * <p>Handler for attribute name and value.
+   */
+  protected final PropertyHandler propHandler = new PropertyHandler();
+  
+  /**
    * <p>Create instance instructions for the given element and process all of the element's sub-nodes.
    * 
    * @param element
@@ -95,11 +99,11 @@ public class FXMLElement
     //Create the diamond operator for the declaration.
     instanceGenericType = createGenericArgs(element);
     
-    //Create the element id.
-    instanceName = createInstanceName(element);
-    
     //Is field?
     isField = !element.getAttribute("fx:id").isBlank();
+    
+    //Create the element id.
+    instanceName = createInstanceName(element);
     
     //Create element instructions from attributes.
     createElementInstructions(element, instanceName);
@@ -114,6 +118,178 @@ public class FXMLElement
       {
         handleElement((Element) item);
       }
+    }
+  }
+  
+  /**
+   * <p>Simply store the element creator and let the subclass set up its instructions.  Helpful for implementations which must set
+   * their state in a constructor (immutable) such as Color, Insets, Font and others.
+   * <p>The implementations that will call this constructor are ancillary classes and not descendants of java.scene.Node.  As such,
+   * they can not be fields (no fx:id) nor have generic arguments.
+   * 
+   * 
+   * @param element
+   * @param elCreator
+   */
+  protected FXMLElement(ElementCreator elCreator, String instanceDataType)
+  {
+    //Store ref to element creator.
+    this.elementCreator = elCreator;
+
+    //Instance data type is the element node name.
+    this.instanceDataType = instanceDataType;
+    
+    //Not a field.
+    isField = false;
+    
+    //No generic information.
+    this.instanceGenericType = "";
+    
+    //Node name.
+    this.instanceName = instanceDataType.toLowerCase() + "LINST" + String.format("%1$04d", elementCreator.getNextID());
+  }
+
+  /**
+   * <p>Create an instance name for an element.  If the element does not have an fx:id then a temporary instance name will be created.
+   * 
+   * @param element
+   * @return
+   */
+  protected final String createInstanceName(Element element)
+  {
+    //Attribute map.
+    NamedNodeMap attributes = element.getAttributes();
+
+    String subElementID;
+    
+    //Set the generic argument to an empty diamond operator if generic arguments exist.
+    String genericArg = (!instanceGenericType.isBlank()) ? "<>" : "";
+    
+    //SPECIAL CASE HANDLING.
+    //
+    //Normally, we use the no-args constructor for the instance and configure the instance properties.  Exceptions to this:
+    //Image - need to specify the url in the constructor.
+    //String constructorArgs = getInstanceConstructorArgs(element);
+    
+    if(isField)
+    {
+      //Look for an "fx:id".
+      Node namedItem = attributes.getNamedItem("fx:id");
+      
+      //This instance has an fx:id.
+      subElementID = namedItem.getNodeValue();
+
+      //Add field instruction.
+      elementCreator.getDescriptor().addField(element.getNodeName() + instanceGenericType + " " + subElementID);
+      
+      //First instruction - create the instance.
+      addInstanceInstruction(subElementID + " = new " + element.getNodeName() + genericArg + "(" + "" + ");");//constructorArgs
+    }
+    else
+    {
+      //Next ID number.
+      int idNum = elementCreator.getNextID();
+      
+      //Element id.
+      subElementID = element.getNodeName().toLowerCase() + "LINST" + String.format("%1$04d", idNum);
+      
+      //Make sure there is a field if the id number is 0.
+      if(idNum == 0) elementCreator.getDescriptor().addField(element.getNodeName() + instanceGenericType + " " + subElementID);
+      
+      //First instruction - create the instance.
+      addInstanceInstruction( ((idNum != 0) ? element.getNodeName() + instanceGenericType + " " : "") + subElementID + " = new " + element.getNodeName() + genericArg + "(" + "" + ");");//constructorArgs
+    }
+    
+    //Return the sub-element id to the caller.
+    return subElementID;
+  }
+  
+  /**
+   * <p>Some elements have no settable properties and require immutable setup via the constructor.  
+   * 
+   * @param element
+   * @return
+   */
+  private String getInstanceConstructorArgs(Element element)
+  {
+    switch(instanceDataType)
+    {
+//      case "Image":
+//        String urlString = element.getAttribute("url");
+//        //Strip off leading '@'
+//        if(urlString.startsWith("@")) urlString = urlString.substring(1);
+//        
+//        //Check to see if the path is absolute.  If relative then inject the relative path calculator.
+//        if(!urlString.startsWith(File.pathSeparator))
+//        {
+//          //Find the resource in the classpath.
+//          urlString = Util.findRelativeResourceLocation(elementCreator.getDescriptor().sourceLocation, urlString);
+//        }
+//        
+//        //Constructor argument.
+//        String cArg = "getClass().getResourceAsStream(\"" + urlString + "\")";
+//        return cArg;
+//      case "Font":
+//        //Process size.  Required.
+//        String fontSize = element.getAttribute("size");
+//        //Name.  Optional.
+//        String fontName = element.getAttribute("name");
+//        
+//        //
+//        if("".equals(fontName))
+//        {
+//          return propHandler.getPropertyValue("size", fontSize, this);
+//        }
+//        else
+//        {
+//          return "\"" + fontName + "\", " + propHandler.getPropertyValue("size", fontSize, this);
+//        }
+//      case "Insets":
+//        //topRightBottomLeft - equal insets.  Either this or all separate.
+//        String check = "";
+//        if(!"".equals(check = element.getAttribute("topRightBottomLeft")))
+//        {
+//          return propHandler.getPropertyValue("_double", check, this);
+//        }
+//        else
+//        {
+//          //Individual insets.
+//          String top = element.getAttribute("top");
+//          top = !"".equals(top) ? top : "0.0"; 
+//          String right = element.getAttribute("right");
+//          right = !"".equals(right) ? right : "0.0"; 
+//          String bottom = element.getAttribute("bottom");
+//          bottom = !"".equals(bottom) ? bottom : "0.0"; 
+//          String left = element.getAttribute("left");
+//          left = !"".equals(left) ? left : "0.0"; 
+//
+//          return top + ", " + right + ", " + bottom + ", " + left;
+//        }
+      default:
+        return "";
+    }
+  }
+  
+  /**
+   * <p>Create element instructions, which handles attributes of the instance's fxml element and creates Java statements for them.
+   * 
+   * @param element
+   * @param instanceNameToUse
+   */
+  protected final void createElementInstructions(Element element, String instanceNameToUse)
+  {
+    //Attribute map.
+    NamedNodeMap attributes = element.getAttributes();
+    
+    //Create attribute instructions.
+    for(int i = 0; i < attributes.getLength(); i++)
+    {
+      //Get the next attribute.
+      Attr attribute = (Attr) attributes.item(i);
+      
+      //handle attrib.
+      handleAttribute(attribute.getName(), attribute.getValue());
+      
     }
   }
   
@@ -190,73 +366,31 @@ public class FXMLElement
     return genericField;
   }
   
-  /**
-   * <p>Create an instance name for an element.  If the element does not have an fx:id then a temporary instance name will be created.
-   * 
-   * @param element
-   * @return
-   */
-  protected final String createInstanceName(Element element)
+  private void handleAttribute(String attrName, String attrVal)
   {
-    //Attribute map.
-    NamedNodeMap attributes = element.getAttributes();
+    //Special handling.
+    //
+    //don't process "fx:id" or anything prefixed with "xml".
+    //if the attrName is "id" then make sure any generic information is stripped first, and if blank then don't call.
+    if(!"fx:id".equals(attrName) && !attrName.startsWith("xml"))
+    {
+      //id.
+      if("id".equals(attrName))
+      {
+        //Split generic information.
+        String[] idFields = attrVal.split("\\<");
+        if(!idFields[0].isBlank())
+        {
+          //Add instructions for the attribute.
+          propHandler.handleProperty(attrName, attrVal, this);
+        }
+      }
+      else
+      {
+        //Add instructions for the attribute.
+        propHandler.handleProperty(attrName, attrVal, this);
+      }
 
-    //Look for an "fx:id".
-    Node namedItem = attributes.getNamedItem("fx:id");
-    String subElementID;
-    
-    //Set the generic argument to an empty diamond operator if generic arguments exist.
-    String genericArg = (!instanceGenericType.isBlank()) ? "<>" : "";
-    
-    if(namedItem != null)
-    {
-      //This instance has an fx:id.
-      subElementID = namedItem.getNodeValue();
-
-      //Add field instruction.
-      elementCreator.getDescriptor().addField(element.getNodeName() + instanceGenericType + " " + subElementID);
-      
-      //First instruction - create the instance.
-      addInstanceInstruction(subElementID + " = new " + element.getNodeName() + genericArg + "();");
-    }
-    else
-    {
-      //Next ID number.
-      int idNum = elementCreator.getNextID();
-      
-      //Element id.
-      subElementID = element.getNodeName().toLowerCase() + "LINST" + String.format("%1$04d", idNum);
-      
-      //Make sure there is a field if the id number is 0.
-      if(idNum == 0) elementCreator.getDescriptor().addField(element.getNodeName() + instanceGenericType + " " + subElementID);// + " = new " + element.getNodeName() + genericArg + "();");
-      
-      //First instruction - create the instance.
-      addInstanceInstruction( ((idNum != 0) ? element.getNodeName() + instanceGenericType + " " : "") + subElementID + " = new " + element.getNodeName() + genericArg + "();");
-    }
-    
-    //Return the sub-element id to the caller.
-    return subElementID;
-  }
-  
-  /**
-   * <p>Create element instructions, which handles attributes of the instance's fxml element and creates Java statements for them.
-   * 
-   * @param element
-   * @param instanceNameToUse
-   */
-  protected final void createElementInstructions(Element element, String instanceNameToUse)
-  {
-    //Attribute map.
-    NamedNodeMap attributes = element.getAttributes();
-    
-    //Create attribute instructions.
-    for(int i = 0; i < attributes.getLength(); i++)
-    {
-      //Get the next attribute.
-      Attr item = (Attr) attributes.item(i);
-      
-      //Add instructions for the attribute.
-      handlePropertyAttribute(item, instanceNameToUse);
     }
   }
   
@@ -293,243 +427,13 @@ public class FXMLElement
   }
   
   /**
-   * <p>Handle all attribute types in the base FXML element class.  Attributes can be present in different elements so it makes some sense
-   * to have all attributes handled centrally to avoid duplicating code in the subclasses of this class.  Also, attributes that do not
-   * relate to a given class can be present when a static method needs to be called using an instance as an argument.  For example, any
-   * container FX object can be used as an argument in GridPane.setVgrow(...).  In order to keep things simple, all attributes will be
-   * processed here in one place.
-   *  
-   * @param attribute
-   * @param subElementID 
+   * <p>Add an instruction to to the i18n list.
+   * 
+   * @param instruction
    */
-  private void handlePropertyAttribute(Attr attribute, String subElementID)
+  final void addI18NInstruction(String instruction)
   {
-    //Get the attribute name.
-    String qName = attribute.getName();
-    
-    // Ignore anything prefixed "fx" or "xml".
-    if (qName.startsWith("fx") || qName.startsWith("xml")) return;
-
-    //Get the attribute value.
-    String attrVal = attribute.getValue();
-    
-    // Act only on the attribute's name - this declaration will specify the
-    // datatype.
-    switch (qName)
-    {
-      // Anything with a Pos parameter.
-      case "alignment":
-        // Check import list for Pos.
-        checkImport("javafx.geometry.Pos");
-        addInstanceInstruction(subElementID + ".set" + Util.capitalise(qName) + "(Pos." + attrVal + ");");
-        break;
-      case "StackPane.alignment":
-      case "BorderPane.alignment":
-        //Make sure Pos class has been imported.
-        checkImport("javafx.geometry.Pos");
-        //Add the alignment
-        //Split around '.'.
-        String[] gpComps = qName.split("\\.");
-        String gpIxInstruction = gpComps[0] + ".set" + Util.capitalise(gpComps[1]) + "(" + instanceName + ", " + "Pos." + attrVal + ");";
-        addInstanceInstruction(gpIxInstruction);
-        break;
-      case "halignment":
-      case "columnHalignment":
-        // Check import list for HPos.
-        checkImport("javafx.geometry.HPos");
-        addInstanceInstruction(subElementID + ".set" + Util.capitalise(qName) + "(HPos." + attrVal + ");");
-        break;
-      case "valignment":
-        // Check import list for HPos.
-        checkImport("javafx.geometry.VPos");
-        addInstanceInstruction(subElementID + ".set" + Util.capitalise(qName) + "(VPos." + attrVal + ");");
-        break;
-      case "orientation":
-        // Check import list for HPos.
-        checkImport("javafx.geometry.Orientation");
-        addInstanceInstruction(subElementID + ".set" + Util.capitalise(qName) + "(Orientation." + attrVal + ");");
-        break;
-      // Anything with 1 boolean parameter.
-      case "mnemonicParsing":
-      case "editable":
-      case "resizable":
-      case "sortable":
-      case "pickOnBounds":
-      case "preserveRatio":
-      case "disable":
-      case "selected":
-      case "visible":
-      case "fillHeight":
-      case "fillWidth":
-      case "closable":
-        addInstanceInstruction(subElementID + ".set" + Util.capitalise(qName) + "(" + attrVal + ");");
-        break;
-      // Anything with 1 double parameter.
-      case "maxHeight":
-      case "maxWidth":
-      case "minHeight":
-      case "minWidth":
-      case "prefHeight":
-      case "prefWidth":
-      case "prefWrapLength":
-      case "percentHeight":
-      case "percentWidth":
-      case "spacing":
-      case "fitHeight":
-      case "fitWidth":
-      case "hgap":
-      case "vgap":
-      case "opacity":
-      case "strokeWidth":
-      case "wrappingWidth":
-      case "fixedCellSize":
-      case "size":
-        switch(attrVal)
-        {
-          case "-Infinity":
-            addInstanceInstruction(subElementID + ".set" + Util.capitalise(qName) + "(Double.NEGATIVE_INFINITY);");
-            break;
-          case "Infinity":
-            addInstanceInstruction(subElementID + ".set" + Util.capitalise(qName) + "(Double.POSITIVE_INFINITY);");
-            break;
-          default:
-            addInstanceInstruction(subElementID + ".set" + Util.capitalise(qName) + "(" + attrVal + ");");
-        }
-        break;
-      //Anything with 1 string parameter
-      case "style":
-      case "name":
-        addInstanceInstruction(subElementID + ".set" + Util.capitalise(qName) + "(\"" + attrVal + "\");");
-        break;
-      case "stylesheets":
-        //Single style sheet.  Seems to be prefixed with @.
-        if(attrVal.startsWith("@")) attrVal = attrVal.substring(1);
-        //Set the property.
-        addInstanceInstruction(subElementID + ".getStylesheets().add(Util.resolveRelativeResourceFilePath(getClass(), \"" + attrVal + "\"));");
-        break;
-      case "styleClass":
-        addInstanceInstruction(subElementID + ".getStyleClass().add(\"" + attrVal + "\");");
-        break;
-      case "toggleGroup":
-        //These seem to be prefixed with '$' for some reason.  Strip if so.
-        if(attrVal.startsWith("$")) attrVal = attrVal.substring(1);
-        //Add the toggle group reference.
-        addInstanceInstruction(subElementID + ".setToggleGroup(" + attrVal + ");");
-        break;
-      // Anything with a single String parameter.
-      case "text":
-        // Is the string prefixed with a %? This is an i18n string.
-        if (attrVal.startsWith("%"))
-        {
-          if(isField)
-          {
-            elementCreator.getDescriptor().setI18NTextCommandList.add(subElementID + ".set" + Util.capitalise(qName) + "(resourceBundle.getString(\"" + attrVal.substring(1) + "\"));");
-          }
-          else
-          {
-            addInstanceInstruction(subElementID + ".set" + Util.capitalise(qName) + "(resourceBundle.getString(\"" + attrVal.substring(1) + "\"));");
-            System.out.println(String.format(ResourceBundle.getBundle("fxml2java.element.strings").getString("textwarn"), subElementID));
-          }
-        }
-        else
-        {
-          addInstanceInstruction(subElementID + ".set" + Util.capitalise(qName) + "(\"" + attrVal + "\");");
-        }
-        break;
-      case "strokeType":
-        //Make sure we import the StrokeType enum.
-        checkImport("javafx.scene.shape.StrokeType");
-        //Add the attribute.
-        addInstanceInstruction(subElementID + ".set" + Util.capitalise(qName) + "(" + Util.capitalise(qName) + "." + attrVal + ");");        
-        break;
-      case "textAlignment":
-        //Make sure we import the StrokeType enum.
-        checkImport("javafx.scene.text.TextAlignment");
-        //Add the attribute.
-        addInstanceInstruction(subElementID + ".set" + Util.capitalise(qName) + "(" + Util.capitalise(qName) + "." + attrVal + ");");        
-        break;
-      case "id":
-        //Make sure any generic information has been stripped off.
-        String[] rawID = attrVal.split("\\<");//[0];//Util.fromHTML(attrVal).split("\\<")[0];
-        if(!rawID[0].isBlank()) addInstanceInstruction(subElementID + ".set" + Util.capitalise(qName) + "(\"" + rawID + "\");");
-        break;
-      // ContentDisplay parameter.
-      case "contentDisplay":
-        // Check import list for ContentDisplay.
-        checkImport("javafx.scene.control.ContentDisplay");
-        addInstanceInstruction(subElementID + ".set" + Util.capitalise(qName) + "(ContentDisplay." + attrVal + ");");
-        break;
-      // Grow parameters.
-      case "hgrow":
-      case "vgrow":
-        // Check import list for Pos.
-        checkImport("javafx.scene.layout.Priority");
-        addInstanceInstruction(subElementID + ".set" + Util.capitalise(qName) + "(Priority." + attrVal + ");");
-        break;
-      case "VBox.vgrow":
-      case "HBox.hgrow":
-      case "GridPane.vgrow":
-      case "GridPane.hgrow":
-        //
-        String staticClass = qName.substring(0, qName.indexOf('.')) + ".";
-        addInstanceInstruction(
-            staticClass + "set" + Util.capitalise(qName.substring(qName.indexOf('.') + 1)) + "(" + subElementID + ", Priority." + attrVal + ");");
-        //Make sure ActionEvent class has been imported.
-        checkImport("javafx.scene.layout.Priority");
-        break;
-      case "GridPane.rowIndex":
-      case "GridPane.columnIndex":
-        //Split around '.'.
-        gpComps = qName.split("\\.");
-        gpIxInstruction = gpComps[0] + ".set" + Util.capitalise(gpComps[1]) + "(" + subElementID + ", " + attrVal + ");";
-        addInstanceInstruction(gpIxInstruction);
-        break;
-      case "GridPane.halignment":
-      case "GridPane.valignment":
-        //Attribute value type prefix.
-        checkImport(("GridPane.halignment".equals(qName)) ? "javafx.geometry.HPos": "javafx.geometry.VPos");
-        String alignmentAttrValPrefix = ("GridPane.halignment".equals(qName)) ? "HPos." : "VPos.";
-        
-        //Split around '.'.
-        gpComps = qName.split("\\.");
-        gpIxInstruction = gpComps[0] + ".set" + Util.capitalise(gpComps[1]) + "(" + subElementID + ", " + alignmentAttrValPrefix + attrVal + ");";
-        addInstanceInstruction(gpIxInstruction);
-        break;
-      case "GridPane.rowSpan":
-      case "GridPane.columnSpan":
-        //Attribute value type prefix.
-        
-        //Split around '.'.
-        gpComps = qName.split("\\.");
-        gpIxInstruction = gpComps[0] + ".set" + Util.capitalise(gpComps[1]) + "(" + subElementID + ", " + attrVal + ");";
-        addInstanceInstruction(gpIxInstruction);
-        break;
-      // TAB PANE.
-      case "tabClosingPolicy":
-        //Make sure the import is present.
-        checkImport("javafx.scene.control.TabPane.TabClosingPolicy");
-        //Add the instruction.
-        addInstanceInstruction(subElementID + ".setTabClosingPolicy(TabClosingPolicy." + attrVal + ");");
-        break;
-      case "side":
-        //Make sure the import is present.
-        checkImport("javafx.geometry.Side");
-        //Add the instruction.
-        addInstanceInstruction(subElementID + ".setSide(Side." + attrVal + ");");        
-        break;
-        // ACTION HANDLERS.
-      case "onAction":
-        elementCreator.getDescriptor().handlerList.add(new Handler(qName, attrVal.substring(1)));  //Remove leading #.
-        //Create a lambda to call the method.
-        addInstanceInstruction(subElementID + ".setOnAction((e) -> {" + attrVal.substring(1) + "(e);});");
-        checkImport("javafx.event.ActionEvent");
-        break;
-      case "url":
-        //Don't do anything.  This needs to be dealt with in all cases by the element handler.
-        break;
-      default:
-        throw new IllegalStateException("Unknown attribute: " + qName + " - can't process.");
-    }
+    elementCreator.getDescriptor().setI18NTextCommandList.add(instruction);
   }
 
   /**
@@ -538,132 +442,139 @@ public class FXMLElement
    * @param element
    */
   protected void handleElement(Element element)
-  {
-    //Get the sub-element name.
-    String subElementName = element.getNodeName();
+  {    
+    //REJIG THIS!!!
+    //WE REALLY NEED TO TAKE IT CASE-BY-CASE OR TRYING TO FIND A UNIFYING METHOD WILL BE CRAZY.
+    //HANDLE SEMANTICALLY - ALL ELEMENTS HANDLED IN SUBCLASSES BY THEIR TYPE AND UNKNOWNS WILL 
+    //NEED ADDING.
     
     ///////////////////////////////////////////////////////////////////////// FXLM ELEMENTS.
     //FXML MAIN ELEMENTS
     if(elementCreator.isJavaFXElement(element))
     {
-      //Use the element creator to create the element and add as a child.
-      FXMLElement createElement = elementCreator.createElement(element);
-      
-      //Add element instructions and register element as a child.
-      subNodeList.add(createElement);
-      
-      //Create an add child instruction.
-      addInstanceInstruction(this.instanceName + ".getChildren().add(" + createElement.instanceName + ");");
+      createInternalElementNode(element);
     }
     else
     {
-      //Handle sub elements depending on their name.
-      switch(subElementName)
+      //Get the sub-element name.
+      String subElementName = element.getNodeName();
+      
+      //Static or instance property?
+      if(subElementName.contains("."))
       {
-        ///////////////////////////////////////////////////////////////////////// NON-FXLM ELEMENTS.
-        //Static insets.
-        case "VBox.margin":
-        case "HBox.margin":
-        case "GridPane.margin":
-          //Get type - subElementName upto '.'
-          String typ = subElementName.substring(0, subElementName.indexOf("."));
-          
-          //Get the <Insets>
-          Element insetsEl = (Element) element.getElementsByTagName("Insets").item(0);
-          
-          //handleStaticInsets(instanceName, typ, el);
-          addInstanceInstruction(typ + ".setMargin(" + instanceName + ", " + getInsetsCreateInstruction(insetsEl) + ");");
-          break;
-        case "image":
-          //Get the <Image> subelement.
-          Element imageEl = (Element) element.getElementsByTagName("Image").item(0);
-          
-          //Get the 'url' attribute from the element.
-          String urlString = imageEl.getAttribute("url");
-          //Strip off leading '@'
-          if(urlString.startsWith("@")) urlString = urlString.substring(1);
-          
-          //Check to see if the path is absolute.  If relative then inject the relative path calculator.
-          if(!urlString.startsWith(File.pathSeparator))
-          {
-            //Find the resource in the classpath.
-            urlString = Util.findRelativeResourceLocation(elementCreator.getDescriptor().sourceLocation, urlString);
-          }
-          
-          //Constructor argument.
-          String cArg = "new Image(getClass().getResourceAsStream(\"" + urlString + "\"))";
+        int i = 0;
+        //Static property.
+        //Split sub element name around the '.'
+        String[] parts = subElementName.split("\\.");
+        
+        //Get an iterator for all sub elements.  These must be properties that can be instanced by the element creator.
+        Iterator<Element> elIt = Util.getSubElementIterator(element);
+        
+        //Set all properties.
+        for( ; elIt.hasNext(); )
+        {
+          //Get the next element.
+          Element nextXMLElement = elIt.next();
 
-          //Add to the container.
-          //Add declaration.
-          addInstanceInstruction(instanceName + ".setImage(" + cArg + ");");
+          //Create the sub-node.
+          FXMLElement subElement = elementCreator.createElement(nextXMLElement);
+
+          //Add to node as sub node.  The instructions for the property must be created before they can be referenced in the instruction below.
+          addSubNode(subElement);
           
-          break;
-        case "opaqueInsets":
-          //Get the insets creation subcommand.
-          String opaqueInsets = getInsetsCreateInstruction((Element) element.getElementsByTagName("Insets").item(0));
-          //Add the set insets command.
-          addInstanceInstruction(instanceName + ".setOpaqueInsets(" + opaqueInsets + ");");
-          break;
-        case "font":
-          //Contains a <Font> element.
-          Element fontEl = Util.getFirstXMLElement(element);
-          //Font instance name.
-          String fontName;
-          String fontSize;
-          //Get the font parameters.  These are not properties; each Font instance is immutable and is created with the constructor only.
-          if(!"".equals(fontName = fontEl.getAttribute("name")) && !"".equals(fontSize = fontEl.getAttribute("size")))
-          {
-            //Create the Font instance and set the containing instance's setFont(...) method.
-            //createElementInstructions(fontEl, fontInst = createInstanceName(fontEl));
-            //Add the prefix instruction.
-            addInstanceInstruction(instanceName + ".setFont(new Font(\"" + fontName + "\", " + fontSize + "));");
-          }
-          else
-          {
-            //Currently we can only handle a Font declaration with a name and size attribute.
-            throw new IllegalStateException("Don't know how to process font with the given attributes.  An attribute handler is required.");
-          }
-          break;
-        case "toggleGroup":
-          //Handle the toggle group declaration.
-          //The first child element is <ToggleGroup>, which contains the group name as an fx:id attribute.
-          String groupString = ( (Element) element.getElementsByTagName("ToggleGroup").item(0)).getAttribute("fx:id");
-          //Toggle groups are always fields because they have an fx:id and there's no way to specify if they should be fields or not
-          //in SceneBuilder.
-          elementCreator.getDescriptor().addField("ToggleGroup " + groupString);
-          //Create the group.
-          addInstanceInstruction(groupString + " = new ToggleGroup();");
-          //Check the import for ToggleGroup exists.
-          elementCreator.getDescriptor().addImport("javafx.scene.control.ToggleGroup");
-          //Set the toggle group property of the owning instance.
-          addInstanceInstruction(instanceName + ".setToggleGroup(" + groupString + ");");
-          break;
-        default:
-          //Still here.  We can't find anything that is able to process the requested element.
-          throw new IllegalStateException("Don't know how to process child node of type " + subElementName);
+          //Create the instruction.
+          addInstanceInstruction(parts[0] + ".set" + Util.capitalise(parts[1]) + "(" + instanceName + ", " + subElement.instanceName + ");");       
+        }
       }
+      else
+      {
+        //Instance property.
+        int i = 0;
+        
+        //Single, settable property.
+        Element firstXMLElement = Util.getFirstXMLElement(element);
+        
+        //Create it.
+        FXMLElement subElement = elementCreator.createElement(firstXMLElement);
+        
+        //Add to node as sub node.  The instructions for the property must be created before they can be referenced in the instruction below.
+        addSubNode(subElement);
+        
+        //Create the instruction.
+        addInstanceInstruction(instanceName + ".set" + Util.capitalise(subElementName) + "(" + subElement.instanceName + ");");       
+      }
+//      //Property.
+//      //Properties require handlers.  If a property does not have a handler then this method will throw an exception.
+//      switch (subElementName)
+//      {
+//        ///////////////////////////////////////////////////////////////////////// NON-FXLM
+//        ///////////////////////////////////////////////////////////////////////// ELEMENTS.
+//        // Static insets.
+//        case "VBox.margin":
+//        case "HBox.margin":
+//        case "GridPane.margin":
+//          
+//          //Split sub element name around the '.'
+//          String[] parts = subElementName.split("\\.");         
+//          // Get the <Insets>
+//          Element insetsEl = (Element) element.getElementsByTagName("Insets").item(0);       
+//          //Create the Insets sub-node.
+//          FXMLElement insetsElement = createInternalElementNode(insetsEl);
+//          //Ensure import.
+//          checkImport("javafx.geometry.Insets");
+//          //Create the instruction.
+//          addInstanceInstruction(parts[0] + ".set" + Util.capitalise(parts[1]) + "(" + instanceName + ", " + insetsElement.instanceName + ");");
+//          break;
+//        case "opaqueInsets":
+//          // Get the <Insets>
+//          insetsEl = (Element) element.getElementsByTagName("Insets").item(0);       
+//          //Create the Insets sub-node.
+//          insetsElement = createInternalElementNode(insetsEl);
+//          //Ensure import.
+//          checkImport("javafx.geometry.Insets");
+//          //Create the instruction.
+//          addInstanceInstruction(instanceName + ".setOpaqueInsets(" + insetsElement.instanceName + ");");
+//          break;
+//        case "font":
+//          //Get Font element.
+//          // Get the <Font>
+//          Element fontEl = (Element) element.getElementsByTagName("Font").item(0);       
+//          //Create the Insets sub-node.
+//          insetsElement = createInternalElementNode(fontEl);
+//          //Ensure import.
+//          checkImport("javafx.geometry.Insets");
+//          //Create the instruction.
+//          addInstanceInstruction(instanceName + ".setFont(" + insetsElement.instanceName + ");");          
+//          break;
+//        case "toggleGroup":
+//          PLAN THIS PROPERLY!!!
+//        default:
+//          throw new IllegalArgumentException("Don't know how to process sub-element " + subElementName);
+//      }
+//      
     }
   }
   
-  /**
-   * <p>Handle a set insets declaration for a node instance.  Like [inst of Button].setPadding(...
-   * 
-   * @param parentTagName
-   * @param insetsParentDecl
-   * @param insetsElement
+  /*
+   * As a result of processing child elements of this FXML element, create sub node instances and add them to the subnode list
+   * in one handy operation. 
    */
-  protected String getInsetsCreateInstruction(Element insetsEl)
+  protected FXMLElement createInternalElementNode(Element element)
   {
-    String val;
-    String topPar = (val = insetsEl.getAttribute("top")).equals("") ? "0.0" : val;
-    String bottomPar = (val = insetsEl.getAttribute("bottom")).equals("") ? "0.0" : val;
-    String leftPar = (val = insetsEl.getAttribute("left")).equals("") ? "0.0" : val;
-    String rightPar = (val = insetsEl.getAttribute("right")).equals("") ? "0.0" : val;
-    return "new Insets(Double.parseDouble(\"" + topPar
-        + "\"), Double.parseDouble(\"" + rightPar + "\"), Double.parseDouble(\"" + bottomPar
-        + "\"), Double.parseDouble(\"" + leftPar + "\"))";
+    //Use the element creator to create the element and add as a child.
+    FXMLElement createElement = elementCreator.createElement(element);
+    
+    //Add element instructions and register element as a child.
+    subNodeList.add(createElement);
+    
+    //Create an add child instruction.
+    //JavaFX elements which contain other JavaFX elements are inherently Parents; <children> is optional.
+    addInstanceInstruction(this.instanceName + ".getChildren().add(" + createElement.instanceName + ");");
+    
+    //Return the created element.
+    return createElement;
   }
-
+  
   /**
    * <p>Add the given import if it is not already present.
    * 
@@ -701,4 +612,14 @@ public class FXMLElement
   {
     elementCreator.getDescriptor().addField(fieldCommand);
   }
+
+  /**
+   * <p>Add the handler method.
+   * @param handler
+   */
+  public void addHandlerMethod(Handler handler)
+  {
+    elementCreator.getDescriptor().addHandlerInstruction(handler); 
+  }
+
 }

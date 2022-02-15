@@ -46,9 +46,9 @@ public class RegionElement extends FXMLElement
       case "children":
         handleChildren(element);
         break;
-      case "padding":
-        handlePadding(element);
-        break;
+//      case "padding":
+//        handlePadding(element);
+//        break;
       default:
         super.handleElement(element);
     }
@@ -68,10 +68,11 @@ public class RegionElement extends FXMLElement
     {
       //Get the insets new (sub-)instruction.
       //ASSUME that the first item is an element of <Insets> 
-      String insetsCreateInstruction = getInsetsCreateInstruction((Element) elementsByTagName.item(0));
+      //String insetsCreateInstruction = getInsetsCreateInstruction((Element) elementsByTagName.item(0));
+      FXMLElement insetsEl = createInternalElementNode((Element) elementsByTagName.item(0));
       
       //Add the instruction.
-      addInstanceInstruction(instanceName + ".setPadding(" + insetsCreateInstruction + ");");
+      addInstanceInstruction(instanceName + ".setPadding(" + insetsEl.instanceName + ");");
     }
   }
 

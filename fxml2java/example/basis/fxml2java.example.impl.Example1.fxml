@@ -18,7 +18,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<fx:root type="javafx.scene.layout.VBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="536.0" prefWidth="829.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="536.0" prefWidth="829.0" type="javafx.scene.layout.VBox" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1">
       <HBox alignment="CENTER" prefWidth="200.0" VBox.vgrow="NEVER">
          <children>
             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%title">
@@ -41,7 +41,10 @@
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </HBox.margin>
                <children>
-                  <Button fx:id="btnLeftPanel1" mnemonicParsing="false" onAction="#onBtnLeft1" prefWidth="10000.0" text="%button1.txt" />
+                  <Button fx:id="btnLeftPanel1" mnemonicParsing="false" onAction="#onBtnLeft1" prefWidth="10000.0" text="%button1.txt" textFill="#d33f3f">
+                  <font>
+                     <Font name="Artifakt Element Bold Italic" size="11.0" />
+                  </font></Button>
                   <Button fx:id="btnLeftPanel2" mnemonicParsing="false" onAction="#onBtnLeft2" prefWidth="10000.0" text="%button2.txt" />
                   <Button fx:id="btnLeftPanel3" mnemonicParsing="false" onAction="#onBtnLeft3" prefWidth="10000.0" text="%button3.txt" />
                   <VBox prefWidth="100.0" spacing="10.0" styleClass="ex-class-1" stylesheets="@../style1.css" VBox.vgrow="NEVER">

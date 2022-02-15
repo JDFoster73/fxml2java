@@ -43,59 +43,61 @@ public class GridPaneElement extends RegionElement
   @Override
   protected void handleElement(Element element)
   {
-    switch(element.getNodeName())
+    switch (element.getNodeName())
     {
-      //Constraints.
-      case "columnConstraints":
-        handleColumnConstraints(element);
-        break;
+      // Constraints.
       case "rowConstraints":
         handleRowConstraints(element);
+        break;
+      case "columnConstraints":
+        handleColumnConstraints(element);
         break;
       default:
         super.handleElement(element);
     }
     
   }
-
+  
   private void handleRowConstraints(Element element)
   {
-    //Get each constraint element and add instructions for it.
+    // Get each constraint element and add instructions for it.
     NodeList childNodes = element.getChildNodes();
-    for(int i = 0; i < childNodes.getLength(); i++)
+    for (int i = 0; i < childNodes.getLength(); i++)
     {
       Node item = childNodes.item(i);
-      if(item.getNodeType() == Node.ELEMENT_NODE)
+      if (item.getNodeType() == Node.ELEMENT_NODE)
       {
-        //Constraint.
+        // Constraint.
         Element constraint = (Element) item;
         
-        //Create the constraint instance.    
-        String constraintInstance = createInstanceName(constraint);
-        createElementInstructions(constraint, constraintInstance);
-        //Add the constraint to the instance.
-        addInstanceInstruction(instanceName + ".getRowConstraints().add(" + constraintInstance + ");");
+        // Create the constraint instance.
+        FXMLElement createSubNode = createSubNode(constraint);
+        addSubNode(createSubNode);
+        
+        // Add the constraint to the instance.
+        addInstanceInstruction(instanceName + ".getRowConstraints().add(" + createSubNode.instanceName + ");");
       }
     }
   }
-
+  
   private void handleColumnConstraints(Element element)
   {
-    //Get each constraint element and add instructions for it.
+    // Get each constraint element and add instructions for it.
     NodeList childNodes = element.getChildNodes();
-    for(int i = 0; i < childNodes.getLength(); i++)
+    for (int i = 0; i < childNodes.getLength(); i++)
     {
       Node item = childNodes.item(i);
-      if(item.getNodeType() == Node.ELEMENT_NODE)
+      if (item.getNodeType() == Node.ELEMENT_NODE)
       {
-        //Constraint.
+        // Constraint.
         Element constraint = (Element) item;
         
-        //Create the constraint instance.
-        String constraintInstance = createInstanceName(constraint);
-        createElementInstructions(constraint, constraintInstance);
-        //Add the constraint to the instance.
-        addInstanceInstruction(instanceName + ".getColumnConstraints().add(" + constraintInstance + ");");
+        // Create the constraint instance.
+        FXMLElement createSubNode = createSubNode(constraint);
+        addSubNode(createSubNode);
+        
+        // Add the constraint to the instance.
+        addInstanceInstruction(instanceName + ".getColumnConstraints().add(" + createSubNode.instanceName + ");");
       }
     }
   }
