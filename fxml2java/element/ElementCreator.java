@@ -89,6 +89,7 @@ public class ElementCreator
     elementCreationMap.put("VBox", regionFXMLEle);
     elementCreationMap.put("HBox", regionFXMLEle);
     elementCreationMap.put("StackPane", regionFXMLEle);
+    elementCreationMap.put("AnchorPane", regionFXMLEle);
     elementCreationMap.put("ListView", regionFXMLEle);
     elementCreationMap.put("Separator", regionFXMLEle);
 

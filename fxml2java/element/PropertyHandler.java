@@ -301,6 +301,11 @@ public class PropertyHandler
       case "GridPane.rowSpan":
         return propVal;
       // Double parameter.
+      //{AnchorPane constraints}.
+      case "AnchorPane.topAnchor":  
+      case "AnchorPane.leftAnchor":  
+      case "AnchorPane.rightAnchor":  
+      case "AnchorPane.bottomAnchor":  
       case "maxHeight":
       case "maxWidth":
       case "minHeight":
@@ -324,6 +329,8 @@ public class PropertyHandler
       case "right":
       case "bottom":
       case "left":
+      case "layoutX":
+      case "layoutY":
       case "_double": //Dummy property name.
         switch (propVal)
         {

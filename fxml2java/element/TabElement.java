@@ -69,11 +69,13 @@ public class TabElement extends RegionElement
         //Get the tab fxml element and create a tab with it.
         Element tabContent = (Element) childNodes.item(i);
 
-        //Create the tab instance.
-        String tabInstance = createInstanceName(tabContent);
-        createElementInstructions(tabContent, tabInstance);
+        //Create the element.
+        FXMLElement content = createSubNode(tabContent);
+        //Add to the tab.
+        addSubNode(content);
+        
         //Add the tab to the instance's tabs property.
-        addInstanceInstruction(instanceName + ".setContent(" + tabInstance + ");");
+        addInstanceInstruction(instanceName + ".setContent(" + content.instanceName + ");");
         
         //Only one content node allowed - break.
         break;

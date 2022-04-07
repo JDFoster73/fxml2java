@@ -106,7 +106,7 @@ public class FXMLElement
     instanceName = createInstanceName(element);
     
     //Create element instructions from attributes.
-    createElementInstructions(element, instanceName);
+    createElementInstructions(element);
     
     //Process sub-elements.
     //
@@ -165,17 +165,11 @@ public class FXMLElement
     //Set the generic argument to an empty diamond operator if generic arguments exist.
     String genericArg = (!instanceGenericType.isBlank()) ? "<>" : "";
     
-    //SPECIAL CASE HANDLING.
-    //
-    //Normally, we use the no-args constructor for the instance and configure the instance properties.  Exceptions to this:
-    //Image - need to specify the url in the constructor.
-    //String constructorArgs = getInstanceConstructorArgs(element);
-    
-    if(isField)
+    //Look for an "fx:id".
+    Node namedItem = attributes.getNamedItem("fx:id");
+
+    if(namedItem != null)
     {
-      //Look for an "fx:id".
-      Node namedItem = attributes.getNamedItem("fx:id");
-      
       //This instance has an fx:id.
       subElementID = namedItem.getNodeValue();
 
@@ -183,7 +177,7 @@ public class FXMLElement
       elementCreator.getDescriptor().addField(element.getNodeName() + instanceGenericType + " " + subElementID);
       
       //First instruction - create the instance.
-      addInstanceInstruction(subElementID + " = new " + element.getNodeName() + genericArg + "(" + "" + ");");//constructorArgs
+      addInstanceInstruction(subElementID + " = new " + element.getNodeName() + genericArg + "(" + "" + ");");
     }
     else
     {
@@ -204,71 +198,6 @@ public class FXMLElement
     return subElementID;
   }
   
-  /**
-   * <p>Some elements have no settable properties and require immutable setup via the constructor.  
-   * 
-   * @param element
-   * @return
-   */
-  private String getInstanceConstructorArgs(Element element)
-  {
-    switch(instanceDataType)
-    {
-//      case "Image":
-//        String urlString = element.getAttribute("url");
-//        //Strip off leading '@'
-//        if(urlString.startsWith("@")) urlString = urlString.substring(1);
-//        
-//        //Check to see if the path is absolute.  If relative then inject the relative path calculator.
-//        if(!urlString.startsWith(File.pathSeparator))
-//        {
-//          //Find the resource in the classpath.
-//          urlString = Util.findRelativeResourceLocation(elementCreator.getDescriptor().sourceLocation, urlString);
-//        }
-//        
-//        //Constructor argument.
-//        String cArg = "getClass().getResourceAsStream(\"" + urlString + "\")";
-//        return cArg;
-//      case "Font":
-//        //Process size.  Required.
-//        String fontSize = element.getAttribute("size");
-//        //Name.  Optional.
-//        String fontName = element.getAttribute("name");
-//        
-//        //
-//        if("".equals(fontName))
-//        {
-//          return propHandler.getPropertyValue("size", fontSize, this);
-//        }
-//        else
-//        {
-//          return "\"" + fontName + "\", " + propHandler.getPropertyValue("size", fontSize, this);
-//        }
-//      case "Insets":
-//        //topRightBottomLeft - equal insets.  Either this or all separate.
-//        String check = "";
-//        if(!"".equals(check = element.getAttribute("topRightBottomLeft")))
-//        {
-//          return propHandler.getPropertyValue("_double", check, this);
-//        }
-//        else
-//        {
-//          //Individual insets.
-//          String top = element.getAttribute("top");
-//          top = !"".equals(top) ? top : "0.0"; 
-//          String right = element.getAttribute("right");
-//          right = !"".equals(right) ? right : "0.0"; 
-//          String bottom = element.getAttribute("bottom");
-//          bottom = !"".equals(bottom) ? bottom : "0.0"; 
-//          String left = element.getAttribute("left");
-//          left = !"".equals(left) ? left : "0.0"; 
-//
-//          return top + ", " + right + ", " + bottom + ", " + left;
-//        }
-      default:
-        return "";
-    }
-  }
   
   /**
    * <p>Create element instructions, which handles attributes of the instance's fxml element and creates Java statements for them.
@@ -276,7 +205,7 @@ public class FXMLElement
    * @param element
    * @param instanceNameToUse
    */
-  protected final void createElementInstructions(Element element, String instanceNameToUse)
+  protected final void createElementInstructions(Element element)
   {
     //Attribute map.
     NamedNodeMap attributes = element.getAttributes();
@@ -462,7 +391,6 @@ public class FXMLElement
       //Static or instance property?
       if(subElementName.contains("."))
       {
-        int i = 0;
         //Static property.
         //Split sub element name around the '.'
         String[] parts = subElementName.split("\\.");
@@ -489,8 +417,7 @@ public class FXMLElement
       else
       {
         //Instance property.
-        int i = 0;
-        
+
         //Single, settable property.
         Element firstXMLElement = Util.getFirstXMLElement(element);
         
@@ -503,55 +430,6 @@ public class FXMLElement
         //Create the instruction.
         addInstanceInstruction(instanceName + ".set" + Util.capitalise(subElementName) + "(" + subElement.instanceName + ");");       
       }
-//      //Property.
-//      //Properties require handlers.  If a property does not have a handler then this method will throw an exception.
-//      switch (subElementName)
-//      {
-//        ///////////////////////////////////////////////////////////////////////// NON-FXLM
-//        ///////////////////////////////////////////////////////////////////////// ELEMENTS.
-//        // Static insets.
-//        case "VBox.margin":
-//        case "HBox.margin":
-//        case "GridPane.margin":
-//          
-//          //Split sub element name around the '.'
-//          String[] parts = subElementName.split("\\.");         
-//          // Get the <Insets>
-//          Element insetsEl = (Element) element.getElementsByTagName("Insets").item(0);       
-//          //Create the Insets sub-node.
-//          FXMLElement insetsElement = createInternalElementNode(insetsEl);
-//          //Ensure import.
-//          checkImport("javafx.geometry.Insets");
-//          //Create the instruction.
-//          addInstanceInstruction(parts[0] + ".set" + Util.capitalise(parts[1]) + "(" + instanceName + ", " + insetsElement.instanceName + ");");
-//          break;
-//        case "opaqueInsets":
-//          // Get the <Insets>
-//          insetsEl = (Element) element.getElementsByTagName("Insets").item(0);       
-//          //Create the Insets sub-node.
-//          insetsElement = createInternalElementNode(insetsEl);
-//          //Ensure import.
-//          checkImport("javafx.geometry.Insets");
-//          //Create the instruction.
-//          addInstanceInstruction(instanceName + ".setOpaqueInsets(" + insetsElement.instanceName + ");");
-//          break;
-//        case "font":
-//          //Get Font element.
-//          // Get the <Font>
-//          Element fontEl = (Element) element.getElementsByTagName("Font").item(0);       
-//          //Create the Insets sub-node.
-//          insetsElement = createInternalElementNode(fontEl);
-//          //Ensure import.
-//          checkImport("javafx.geometry.Insets");
-//          //Create the instruction.
-//          addInstanceInstruction(instanceName + ".setFont(" + insetsElement.instanceName + ");");          
-//          break;
-//        case "toggleGroup":
-//          PLAN THIS PROPERLY!!!
-//        default:
-//          throw new IllegalArgumentException("Don't know how to process sub-element " + subElementName);
-//      }
-//      
     }
   }
   

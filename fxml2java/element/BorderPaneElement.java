@@ -77,10 +77,16 @@ public class BorderPaneElement extends RegionElement
     //Only one node can be added to a border.
     Element borderEl = (Element) Util.getFirstXMLElement(element);
     
-    String borderChildInstance = createInstanceName(borderEl);
-    createElementInstructions(borderEl, borderChildInstance);
+    //Create instance name for border child.
+    //String borderChildInstance = createInstanceName(borderEl);
+    
+    //Create the subelement and add to this.
+    FXMLElement borderPaneSubNode = createSubNode(borderEl);//createInternalElementNode(borderEl);
+    addSubNode(borderPaneSubNode);
+    //createElementInstructions(borderEl);
     //Add the tab to the instance's tabs property.
-    addInstanceInstruction(instanceName + ".set" + border + "(" + borderChildInstance + ");");
+    //addInstanceInstruction(instanceName + ".set" + border + "(" + borderChildInstance + ");");
+    addInstanceInstruction(instanceName + ".set" + border + "(" + borderPaneSubNode.instanceName + ");");
     
   }
 }
