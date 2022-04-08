@@ -294,6 +294,8 @@ public class PropertyHandler
       case "visible":
       case "closable":
       case "sortable":
+      case "fitToHeight":
+      case "fitToWidth":
       //Integer parameter.
       case "GridPane.columnIndex":
       case "GridPane.rowIndex":
